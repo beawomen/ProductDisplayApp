@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet } from "react-native";
+import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from "react-native";
 import { fetchProducts } from "../api/api";
 
 const ProductListScreen = ({ navigation }) => {
   const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadProducts = async () => {
       try {
         const productsData = await fetchProducts();
         setProducts(productsData);
+        setLoading(false); 
       } catch (error) {
         console.error("Error loading products:", error);
+        setLoading(false); 
       }
     };
 
@@ -28,14 +31,24 @@ const ProductListScreen = ({ navigation }) => {
         <View style={styles.cardContent}>
           <Image source={{ uri: item.thumbnail }} style={styles.productImage} />
           <View style={styles.productText}>
-            <Text>{item.title}</Text>
-            <Text>${item.price}</Text>
+            <Text style={styles.productTitle}>{item.title}</Text>
+            <Text style={styles.productPrice}>${item.price}</Text>
           </View>
         </View>
       </View>
     </TouchableOpacity>
   );
 
+ 
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.loadingContainer]}>
+        <ActivityIndicator size="large" color="#000" />
+      </View>
+    );
+  }
+
+  
   return (
     <View style={styles.container}>
       <FlatList
@@ -50,13 +63,20 @@ const ProductListScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#C5C5C5",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   productCard: {
-    padding: 16,
     borderRadius: 8,
-    backgroundColor: "#fff",
+    backgroundColor: 'white',
     marginVertical: 8,
-    marginHorizontal: 16,
+    padding: 16,
     elevation: 3,
   },
   cardContent: {
@@ -70,6 +90,15 @@ const styles = StyleSheet.create({
   },
   productText: {
     flex: 1,
+  },
+  productTitle: {
+    color: "#000",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  productPrice: {
+    color: "#000",
+    fontSize: 14,
   },
 });
 
